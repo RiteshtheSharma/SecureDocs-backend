@@ -16,4 +16,9 @@ const UserSchema = new Schema({
         default:Date.now
     },
 });
-module.exports = mongoose.model('user', UserSchema )
+/*
+this resolves an issue that is - if the user submits the request two times with the same ‘Name’ and ‘Email’ then the two different entries of Data are stored in the database. This means that we are not getting the unique email for each submitted data.
+*/
+const User = mongoose.model('user', UserSchema);
+User.createIndexes();
+module.exports = User;
