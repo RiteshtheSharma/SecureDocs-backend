@@ -1,12 +1,13 @@
 const express = require("express");
 const User = require("../models/User");
 const bcrypt = require('bcryptjs');
-
+var jwt = require('jsonwebtoken');
 const { body, validationResult } = require("express-validator");
 
 const router = express.Router();
 
 // Create a user using POST "/api/auth" Doesn' t require auth
+// create user endpoint 
 router.post(
   "/createuser",
   [
@@ -27,25 +28,27 @@ router.post(
 
     // check whether the user with same email exists already
     try {
-      let user = await User.findOne({ email: req.body.email });
+    
+      let user = await User.findOne({ email: req.body.email })
       if (user) {
         return res
           .status(400)
           .json({ error: "Sorry a user with the same Email exists" });
       }
       //create a user
-      const salt1 = await bcrypt.genSalt(10);
-      const HashedPwd = await bcrypt.hash(req.body.password,salt1);
+      const salt = await bcrypt.genSalt(10);
+      const HashedPwd =await bcrypt.hash(req.body.password,salt)
       user = await User.create({
         name: req.body.name,
         email: req.body.email,
         password:HashedPwd,
-        // date: req.body.date,
+        
       });
-
-      //   .then(user => res.json(user))
-      //   .catch(err =>{console.log("here we are interrupted by error : ",err);res.json({error:'Please enter a valid value for email',message : err.message})});
-      res.json(user);
+const data = {
+  user:{id:user.id}
+}
+const AUTH_TOKEN = jwt.sign(data, process.env.JWT_SECRET)
+       res.json({AUTH_TOKEN});
       
     } catch (err) {
       console.log("error :( ->\n", err.message);
@@ -53,4 +56,9 @@ router.post(
     }
   }
 );
+
+//login endpoint
+
+
+
 module.exports = router;
