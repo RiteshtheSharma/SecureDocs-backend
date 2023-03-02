@@ -1,9 +1,13 @@
-// mongodb://localhost:27017/?directConnection=true
+
 const mongoose = require('mongoose')
-const mongoUrl = 'mongodb+srv://AdminAlpha:eM5CAHgjb5fa3M0j@cluster0.5aucxhy.mongodb.net/?retryWrites=true&w=majority' 
+//Help to acess .env 's env varuiable using custom-env package 
+// Pass true to env() to make it use the current environment stage.
+require ('custom-env').env('local')
+
+const Mongodb_Api = process.env.DATABASE_API;
 const connectToMongo = ()=>{
-    mongoose.connect (mongoUrl,()=>{
-        console.log('\nConnection to mongoose sucessfully \n')
+    mongoose.connect (Mongodb_Api,()=>{
+        console.log('\nConnection to mongoose sucessfully \n' )
     });
 } 
 module.exports = connectToMongo;

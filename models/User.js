@@ -4,7 +4,8 @@ const UserSchema = new Schema({
     name: {type:String,required:true},
     email:{
         type:String,
-        required:true
+        required:true,
+        unique:true
     },
     password:{
         type:String,
@@ -17,8 +18,9 @@ const UserSchema = new Schema({
     },
 });
 /*
-this resolves an issue that is - if the user submits the request two times with the same ‘Name’ and ‘Email’ then the two different entries of Data are stored in the database. This means that we are not getting the unique email for each submitted data.
+User.createIndexes(); resolves an issue that is - if the user submits the request two times with the same ‘Name’ and ‘Email’ then the two different entries of Data are stored in the database. This means that we are not getting the unique email for each submitted data.
+
 */
 const User = mongoose.model('user', UserSchema);
-User.createIndexes();
+
 module.exports = User;
