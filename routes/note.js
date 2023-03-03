@@ -3,7 +3,7 @@ const Note = require('../models/Note');
 const fetchuser = require('../middleware/fetchuser');
 const { body, validationResult } = require("express-validator");
 const router = express.Router() 
-//Router 1 : GEt all notes using : GET "api/auth/getuser" . LOgin required
+//Router 1 : GEt all notes using : GET "api/note/getuser" . LOgin required
 router.get('/fetchallnotes',fetchuser,async (req,res)=>{
     try {
       // find all notes whose user field(fk) = user id associated with jwt token 
@@ -14,7 +14,7 @@ router.get('/fetchallnotes',fetchuser,async (req,res)=>{
       res.status(500).send({ errors: "Internal server error" });
     }
     })
-    //Router 2 : GEt all notes using : POST "api/auth/addnote" . LOgin required
+    //Router 2 : GEt all notes using : POST "api/note/addnote" . LOgin required
 router.post('/addnote',fetchuser,[
 body("title","Title is too short").trim().isLength({ min: 3 }),
 body("description","Description must be atleast 5 caracters").trim().isLength({ min: 5 }),
@@ -46,4 +46,68 @@ body("description","Description must be atleast 5 caracters").trim().isLength({ 
       res.status(500).send({ errors: "Internal server error" });
     }
     })
+
+//Router 3 : Update an existing note using : PUT "api/note/updatenote" . LOgin required
+router.put('/updatenote/:id',fetchuser,async (req,res)=>{
+  try {const {title,description,tag} = req.body;
+  //create a newNote obj 
+  const newNote = {};
+  if(title){newNote.title = title};
+  if(description){newNote.description = description};
+  if(tag){newNote.tag = tag};
+  
+  // find the note to be updated and update it
+  let note = await Note.findById(req.params.id);
+  // if note with given id not found the send 404 status
+  if(!note){
+   return  res.status(404).send("Not Found")
+  }
+  //check whether the user is requesting for his/her own note to update 
+  if(note.user.toString() !== req.user.id){
+    return res.status(401).send("Unauthorized");
+  
+  }
+  //update the note 
+  note= await Note.findByIdAndUpdate(req.params.id,{$set:newNote},{new:true})
+  res.json(note);
+    
+  } catch (error) {
+    console.log("error :( ->\n", error.message);
+    res.status(500).send({ errors: "Internal server error" });
+  }
+
+
+
+})
+
+
+
+
+
+//Router 4 : Delete an existing note using : delete "api/note/deletenote" . LOgin required
+router.delete('/deletenote/:id',fetchuser,async (req,res)=>{
+  try {
+
+  
+  // find the note to be deleted and delete it
+  let note = await Note.findById(req.params.id);
+  // if note with given id not found the send 404 status
+  if(!note){
+   return  res.status(404).send("Not Found")
+  }
+  //check whether the user is requesting for his/her own note to delete 
+  if(note.user.toString() !== req.user.id){
+    return res.status(401).send("Unauthorized");
+  
+  }
+  //delete the note 
+  note= await Note.findByIdAndDelete(req.params.id)
+  res.json({"sucess":"Deleted sucessfully",note:note});
+    
+  } catch (error) {
+    console.log("error :( ->\n", error.message);
+    res.status(500).send({ errors: "Internal server error" });
+  }
+  
+})
     module.exports = router
