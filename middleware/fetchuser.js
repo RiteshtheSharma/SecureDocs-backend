@@ -7,6 +7,7 @@ if(!token){
     res.status(401).json({error:'Please authenticate using a valid token'})
 }
 try {const data = jwt.verify(token,process.env.JWT_SECRET);
+    console.log('in fetch user',data)
     req.user= data.user ;
     next()
     

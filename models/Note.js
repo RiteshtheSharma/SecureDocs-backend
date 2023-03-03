@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
-const NotesSchema = new Schema({
+const NoteSchema = new Schema({
     // foreign Key which linkes to user collection using its id
     user : {
         type: mongoose.Schema.Types.ObjectId ,
@@ -23,4 +23,4 @@ const NotesSchema = new Schema({
         default:Date.now
     }
 });
-module.exports = mongoose.model('notes', NotesSchema )
+module.exports = mongoose.model('note', NoteSchema )
