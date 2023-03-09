@@ -14,7 +14,7 @@ router.get('/fetchallnotes',fetchuser,async (req,res)=>{
       res.status(500).send({ errors: "Internal server error" });
     }
     })
-    //Router 2 : GEt all notes using : POST "api/note/addnote" . LOgin required
+    //Router 2 : add note using : POST "api/note/addnote" . LOgin required
 router.post('/addnote',fetchuser,[
 body("title","Title is too short").trim().isLength({ min: 3 }),
 body("description","Description must be atleast 5 caracters").trim().isLength({ min: 5 }),

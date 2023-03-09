@@ -1,14 +1,16 @@
 const connectToMongo = require('./db');
-
+const cors = require('cors')
 const express = require('express')
 const app = express()
-const port = 2000
+const port = 2001
 
 connectToMongo();
 
 //middleware to deal with json and use req.body if bellow code is not used then req.body wiill bu undefined
 app.use(express.json())
 
+//enable cors request for all resources
+app.use(cors())
 // avaliable routes
 
 app.use('/api/auth',require('./routes/auth'))
