@@ -1,7 +1,9 @@
 const express = require("express");
 const User = require("../models/User");
+const Note = require('../models/Note');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+
 const fetchuser = require('../middleware/fetchuser')
 const { body, validationResult } = require("express-validator");
 const { findOne } = require("../models/User");
@@ -121,7 +123,7 @@ try {const userID = req.user.id
       res.status(500).send({ errors: "Internal server error" });
 }
 })
-
+//ROUTE 4 : update logged in useremail using PUT request . login required
 router.put('/updateemail',[
   body("email", "Enter a valid email").isEmail().trim().normalizeEmail(),],fetchuser,async (req,res)=>{
   try {const {email} = req.body;
@@ -139,6 +141,7 @@ router.put('/updateemail',[
           .status(400)
           .json({ errors: "You can 't use this email id" });
       }
+  // comes from middleware fetchuser
   const userID = req.user.id;
 
   const UpdatedUser= await User.findByIdAndUpdate(userID ,{$set:{ email:email }},{new:true})
@@ -151,7 +154,7 @@ router.put('/updateemail',[
 
 
 })
-
+//ROUTE 5 : update logged in user password using PUT request . login required
 router.put('/updatepassword',[body(
   "password",
   "Enter a valid password(must be atleast 5 characters)"
@@ -168,6 +171,22 @@ router.put('/updatepassword',[body(
   const HashedPwd =await bcrypt.hash(req.body.password,salt)
   const UpdatedUser= await User.findByIdAndUpdate(userID ,{$set:{ password:HashedPwd}},{new:true})
   res.json(UpdatedUser);
+  } catch (error) {
+    console.log("error :( ->\n", error.message);
+    res.status(500).send({ errors: "Internal server error" });
+  }
+
+
+
+})
+//ROUTE 5 : delete logged in user account and all notes related to him/ner using DELETE request . login required
+router.delete('/deleteuseraccount',fetchuser,async (req,res)=>{
+  try {
+  const userID = req.user.id;
+  // find all notes whose user field(fk) = user id associated with jwt token 
+  const notes = await Note.deleteMany({user:userID });
+  const user = await User.deleteOne({_id:userID});
+  res.json(notes);
   } catch (error) {
     console.log("error :( ->\n", error.message);
     res.status(500).send({ errors: "Internal server error" });
