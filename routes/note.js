@@ -32,7 +32,7 @@ body("description","Description must be atleast 5 caracters").trim().isLength({ 
     const note = new Note(
       {title :title,
         description:description,
-        tag:tag,
+        tag:(tag.length?tag:'General'),
         user :req.user.id
 
       }
@@ -54,7 +54,7 @@ router.put('/updatenote/:id',fetchuser,async (req,res)=>{
   const newNote = {};
   if(title){newNote.title = title};
   if(description){newNote.description = description};
-  if(tag){newNote.tag = tag};
+  if(tag){newNote.tag = (tag.length?tag:'General')};
   
   // find the note to be updated and update it
   let note = await Note.findById(req.params.id);

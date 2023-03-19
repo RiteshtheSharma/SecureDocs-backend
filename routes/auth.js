@@ -37,7 +37,7 @@ router.post(
       if (user) {
         return res
           .status(400)
-          .json({ error: "Sorry a user with the same Email exists" });
+          .json({ errors: "Sorry a user with the same Email exists" });
       }
       //create a encryption of pwd+ salt
       const salt = await bcrypt.genSalt(10);
@@ -91,11 +91,11 @@ router.post(
       if(!user){
         return res
           .status(400)
-          .json({ error: "Any user with given email Id doesn 't exists" });
+          .json({ errors: "Any user with given email Id doesn 't exists" });
       }
       const passwordCompare = await bcrypt.compare(password,user.password);
       if(!passwordCompare){
-        return res.status(400).json({error:'Please provide a valid password for corresponding email id'})
+        return res.status(400).json({errors:'Please provide a valid password for corresponding email id'})
       }
       
 const data = {
@@ -105,7 +105,7 @@ const AUTH_TOKEN = jwt.sign(data, process.env.JWT_SECRET)
        res.json({AUTH_TOKEN});
       
     } catch (err) {
-      console.log("error :( ->\n", err.message);
+      console.log("errors :( ->\n", err.message);
       res.status(500).send({ errors: "Internal server error" });
     }
   }
@@ -122,5 +122,58 @@ try {const userID = req.user.id
 }
 })
 
+router.put('/updateemail',[
+  body("email", "Enter a valid email").isEmail().trim().normalizeEmail(),],fetchuser,async (req,res)=>{
+  try {const {email} = req.body;
+ // validate email against constraints (if proper email format is followed  )
+ const errors = validationResult(req);
+ // if there is errors in email format return bad request and the errors
+ if (!errors.isEmpty()) {
+   return res.status(400).json({ errors: errors.array() });
+ }
 
+  let user = await User.findOne({email:email});
+      //send error response if no given email is already in use
+      if(user){
+        return res
+          .status(400)
+          .json({ errors: "You can 't use this email id" });
+      }
+  const userID = req.user.id;
+
+  const UpdatedUser= await User.findByIdAndUpdate(userID ,{$set:{ email:email }},{new:true})
+  res.json(UpdatedUser);
+  } catch (error) {
+    console.log("error :( ->\n", error.message);
+    res.status(500).send({ errors: "Internal server error" });
+  }
+
+
+
+})
+
+router.put('/updatepassword',[body(
+  "password",
+  "Enter a valid password(must be atleast 5 characters)"
+).isLength({ min: 5 }),],fetchuser,async (req,res)=>{
+  try {const {password} = req.body;
+  // validate password against constraints 
+  const errors = validationResult(req);
+  // if there is errors in password return bad request and the errors
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  const userID = req.user.id;
+  const salt = await bcrypt.genSalt(10);
+  const HashedPwd =await bcrypt.hash(req.body.password,salt)
+  const UpdatedUser= await User.findByIdAndUpdate(userID ,{$set:{ password:HashedPwd}},{new:true})
+  res.json(UpdatedUser);
+  } catch (error) {
+    console.log("error :( ->\n", error.message);
+    res.status(500).send({ errors: "Internal server error" });
+  }
+
+
+
+})
 module.exports = router;
