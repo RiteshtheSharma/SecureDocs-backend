@@ -110,4 +110,37 @@ router.delete('/deletenote/:id',fetchuser,async (req,res)=>{
   }
   
 })
+
+//Router 5 : GEt all notes with given searchterm and type (title/tag/description) using : POST "api/note/getuser" . LOgin required
+router.post('/searchnotes',fetchuser,async (req,res)=>{
+    try {
+        let {term,type} =req.query;
+
+      term = new RegExp(term.toLowerCase(),'i');
+
+      type= type.toLowerCase()
+
+      let notes;
+      if(type==="title")
+       // find all notes whose user field(fk) = user id associated with jwt token & title has all letters in term
+   
+       notes = await Note.find({user:req.user.id,title:{$regex:term}});
+      else if(type==="description")
+       // find all notes whose user field(fk) = user id associated with jwt token & description  has all letters in term
+   
+       notes = await Note.find({user:req.user.id,description:{$regex:term}});
+       else if(type==="tag")
+        // find all notes whose user field(fk) = user id associated with jwt token & tag  has all letters in term
+   
+       notes = await Note.find({user:req.user.id,tag:{$regex:term}});
+     else{
+ // throw error if type is not title,tag or description
+return   res.status(404).send("Type desn 't match")
+     }
+      return   res.json( notes)
+    } catch (error) {
+        console.log("error :( ->\n", error.message);
+      res.status(500).send({ errors: "Internal server error" });
+    }
+    })
     module.exports = router
