@@ -7,7 +7,10 @@ require ('custom-env').env('local')
 const Mongodb_Api = process.env.DATABASE_API;
 
 const connectToMongo = ()=>{
-    mongoose.connect (Mongodb_Api,()=>{
+    mongoose.connect (Mongodb_Api,{
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+  },()=>{
         console.log('\nConnection to mongoose sucessfully \n' )
     });
 } 

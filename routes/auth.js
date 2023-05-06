@@ -1,6 +1,7 @@
 const express = require("express");
 const User = require("../models/User");
-const Note = require('../models/Note');
+const Folder = require('../models/Folder');
+const File = require('../models/File');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -10,7 +11,7 @@ const { findOne } = require("../models/User");
 
 const router = express.Router();
 
-// Create a user using POST "/api/auth" Doesn' t require auth
+// Create a user using POST "/api/auth/createuser" Doesn' t require auth
 
 // ROUTE 1 : createuser endpoint 
 router.post(
@@ -36,6 +37,7 @@ router.post(
     try {
     
       let user = await User.findOne({ email: req.body.email })
+     
       if (user) {
         return res
           .status(400)
@@ -117,7 +119,7 @@ router.post('/getuser',fetchuser,async(req,res)=>{
 try {const userID = req.user.id
 //fetch all related  key: value related to given userID except password
    const user = await User.findById(userID).select('-password')
-  res.json(user)
+  return res.json(user)
 } catch (err) {
   console.log("error :( ->\n", err.message);
       res.status(500).send({ errors: "Internal server error" });
@@ -180,13 +182,16 @@ router.put('/updatepassword',[body(
 
 })
 //ROUTE 5 : delete logged in user account and all notes related to him/ner using DELETE request . login required
+
+
+
 router.delete('/deleteuseraccount',fetchuser,async (req,res)=>{
   try {
   const userID = req.user.id;
   // find all notes whose user field(fk) = user id associated with jwt token 
-  const notes = await Note.deleteMany({user:userID });
+  // const notes = await Note.deleteMany({user:userID });
   const user = await User.deleteOne({_id:userID});
-  res.json(notes);
+  res.json(user);
   } catch (error) {
     console.log("error :( ->\n", error.message);
     res.status(500).send({ errors: "Internal server error" });
@@ -195,4 +200,6 @@ router.delete('/deleteuseraccount',fetchuser,async (req,res)=>{
 
 
 })
+
+
 module.exports = router;
