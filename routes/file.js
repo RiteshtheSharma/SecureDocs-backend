@@ -179,20 +179,23 @@ if (!errors.isEmpty()) {
        .status(400)
        .json({ errors: "Any user with given email Id doesn 't exists" });
    }
-     
+    
     const folder = await Folder.findById(req.folder) 
-    if(folder.user.toString() !== req.user.id){
+    console.log(folder,'egg',req.folder)
+    if(!folder){
      return res.status(401).send("Unauthorized");
    
    }
-
+   
    const file = await File.findById(fileid)
+   
   if(req.folder!==file.folder.toString()){
     return res.status(401).send("Unauthorized");
    
   }
-if(pwd === 'false'){
+if(pwd === 'false'){  
   let shareFolder = await Folder.findOne({ user: Sec_user._id.toString(),name:"share" })
+
   if(!shareFolder){
     share = await Folder.create({ user: Sec_user._id.toString(),name:"share" })
   }
@@ -266,7 +269,7 @@ router.put('/updatefilename/:id',fetchuser,fetchfolder,[
   
   ],async (req,res)=>{
   try {
-
+   
 
     // validatefolder name against constraints 
     const errors = validationResult(req);
@@ -290,12 +293,15 @@ router.put('/updatefilename/:id',fetchuser,fetchfolder,[
   if(!file){
    return  res.status(404).send("Not Found")
   }
+
   //check whether the user is requesting for his/her own folder to update 
   const folder = await Folder.findById(req.folder) 
+  console.log(' reality ',folder)
     if(folder.user.toString() !== req.user.id){
      return res.status(401).send("Unauthorized");
    
    }
+  
    if(req.folder!==file.folder.toString()){
     return res.status(401).send("Unauthorized");
    
@@ -460,8 +466,8 @@ function createZipFile(inputFile, outputFile, password) {
       host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-          user: 'valentin.schimmel@ethereal.email',
-          pass: '8akesxqac72JzpW7fE'
+          user: 'gerry.ortiz41@ethereal.email',
+          pass: '2kkFWmXzRTxCA2amNN'
       }
   });
 

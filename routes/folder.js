@@ -85,7 +85,7 @@ router.put('/updatefoldername/:id',fetchuser,[
  
   
   // find the folder to be updated and update it
-  const folder = await Folder.findById(req.params.id);
+  let folder = await Folder.findById(req.params.id);
   // if folder with given id not found the send 404 status
   if(!folder){
    return  res.status(404).send("Not Found")
@@ -95,7 +95,7 @@ router.put('/updatefoldername/:id',fetchuser,[
     return res.status(401).send("Unauthorized");
   
   }
-  const files = File.
+
 
   //update the folder
   folder= await Folder.findByIdAndUpdate(req.params.id,{$set:newFolder},{new:true})

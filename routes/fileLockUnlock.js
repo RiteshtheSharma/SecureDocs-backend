@@ -75,7 +75,7 @@ router.post('/decrypt', upload.single('file'),async(req,res)=>{
 router.post('/encrypt', upload.single('file'), async (req, res) => {
   const inputFile = req.file.path;
  
-  const outputFile = `${req.file.filename}.enc`;
+  const outputFile = `locked-${req.file.filename}`;
   const password = req.body.password;
   console.log(password,inputFile)
   
