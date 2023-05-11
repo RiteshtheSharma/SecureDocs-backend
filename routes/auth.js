@@ -4,7 +4,8 @@ const Folder = require('../models/Folder');
 const File = require('../models/File');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
+const path = require('path');
+const fs = require('fs');
 const fetchuser = require('../middleware/fetchuser')
 const { body, validationResult } = require("express-validator");
 const { findOne } = require("../models/User");
@@ -190,6 +191,13 @@ router.delete('/deleteuseraccount',fetchuser,async (req,res)=>{
   const userID = req.user.id;
   // find all notes whose user field(fk) = user id associated with jwt token 
   // const notes = await Note.deleteMany({user:userID });
+ 
+  
+
+ await File.deleteMany({ user:req.user.id})
+  await Folder.deleteMany({ user:req.user.id})
+  
+  deleteFolderRecursive( path.join(__dirname, '..', `public/${req.user.id}`))
   const user = await User.deleteOne({_id:userID});
   res.json(user);
   } catch (error) {
@@ -200,6 +208,18 @@ router.delete('/deleteuseraccount',fetchuser,async (req,res)=>{
 
 
 })
-
+const deleteFolderRecursive = function(directoryPath) {
+  if (fs.existsSync(directoryPath)) {
+    fs.readdirSync(directoryPath).forEach(function(file, index) {
+      const curPath = path.join(directoryPath, file);
+      if (fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(directoryPath);
+  }
+};
 
 module.exports = router;

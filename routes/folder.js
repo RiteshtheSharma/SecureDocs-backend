@@ -1,11 +1,12 @@
 const express = require('express');
 const Folder = require('../models/Folder');
-const File = require('../models/Folder')
+const File = require('../models/File')
 const fetchuser = require('../middleware/fetchuser');
 const User = require('../models/User')
 const { body, validationResult } = require("express-validator");
 const fs = require('fs');
 const { ResultWithContext } = require('express-validator/src/chain');
+const path = require('path');
 const router = express.Router() 
 //Router 1 : GEt all folders using : GET "api/folder/fetchallfolders" . LOgin required
 router.get('/fetchallfolders',fetchuser,async (req,res)=>{
@@ -136,22 +137,19 @@ router.delete('/deletefolder/:id',fetchuser,async (req,res)=>{
   
   }
  // delete all file documents linked to the folder and multer generated files 
- const files = await File.deleteMany({folder:req.params.id, user:req.user.id})
- if (fs.existsSync(`../public/${req.user.id}/${req.params.id}`)) {
-  console.log('Folder exists');
-  fs.rm(`../public/${req.user.id}/${req.params.id}`, { recursive: true }, err => {
-    if (err) {
-      console.log('error while deleting multer folder and files',err)
-      throw err
-    }
-  
-    console.log(`dir is deleted!`)
-  })
-} 
+
+
+ deleteFolderRecursive( path.join(__dirname, '..', `public/${req.user.id}/${req.params.id}`))
+
+const file= await File.findOne({user:req.user.id,folder:req.params.id})
+console.log('no of files : ',file)
+if(file)
+ { await File.deleteMany({folder:req.params.id, user:req.user.id})
+ }
 console.log(folder,'folders ')
 await User.findByIdAndUpdate( req.user.id , { $inc: { no_of_folders: -1,no_of_files:-1*(folder.no_of_files),total_server_file_storage:-1*(folder.server_file_storage) } });
   //delete the folder
-  folder= await Folder.deleteOne({ _id: folder._id,user:req.user.id })
+  folder= await Folder.deleteOne({ _id: req.params.id,user:req.user.id })
   res.json({"sucess":"Deleted sucessfully",folder:folder});
     
   } catch (error) {
@@ -160,6 +158,18 @@ await User.findByIdAndUpdate( req.user.id , { $inc: { no_of_folders: -1,no_of_fi
   }
   
 })
-
+const deleteFolderRecursive = function(directoryPath) {
+  if (fs.existsSync(directoryPath)) {
+    fs.readdirSync(directoryPath).forEach(function(file, index) {
+      const curPath = path.join(directoryPath, file);
+      if (fs.lstatSync(curPath).isDirectory()) { // recurse
+        deleteFolderRecursive(curPath);
+      } else { // delete file
+        fs.unlinkSync(curPath);
+      }
+    });
+    fs.rmdirSync(directoryPath);
+  }
+};
 
     module.exports = router

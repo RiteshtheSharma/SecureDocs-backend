@@ -197,7 +197,18 @@ if(pwd === 'false'){
   let shareFolder = await Folder.findOne({ user: Sec_user._id.toString(),name:"share" })
 
   if(!shareFolder){
-    share = await Folder.create({ user: Sec_user._id.toString(),name:"share" })
+    share = await Folder.create({ user: Sec_user._id.toString(),name:"share" ,no_of_files:1,})
+  }
+  else{
+    Folder.updateOne(
+      { _id: shareFolder._id.toString() }, { $inc: { no_of_files: 1,server_file_storage:-1*file.size, } }, function(err, result) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log(result);
+        }
+      }
+     )
   }
 // duplicating file and save in server under new user 's folder is left 
   const  newfile = await File.create({
@@ -326,8 +337,8 @@ router.delete('/deletefile/:id',fetchuser,fetchfolder,async (req,res)=>{
 
   
 
-
   let folder = await Folder.findById(req.folder);
+  console.log(req.folder," for file ")
   //check whether the user is requesting for his/her own file to delete 
   if(folder.user.toString() !== req.user.id){
     return res.status(401).send("Unauthorized");
@@ -336,7 +347,7 @@ router.delete('/deletefile/:id',fetchuser,fetchfolder,async (req,res)=>{
     // find the file to be deleted and delete it
     let file = await File.findById(req.params.id);
     // if file with given id not found the send 404 status
-    console.log(file," for file ")
+    
     if(!file){
      return  res.status(404).send("Not Found")
     }
@@ -345,7 +356,7 @@ router.delete('/deletefile/:id',fetchuser,fetchfolder,async (req,res)=>{
    
   }
  // delete all file documents linked to the folder and multer generated files 
- file = await File.findOne({_id:req.params.id})
+
  const path =file.path;// assign path 
  
  fs.unlink(path, err => {
@@ -359,7 +370,7 @@ router.delete('/deletefile/:id',fetchuser,fetchfolder,async (req,res)=>{
   //delete the file document
 
   Folder.updateOne(
-    { _id: req.folder }, { $inc: { no_of_files: -1,server_file_storage:file.size, } }, function(err, result) {
+    { _id: req.folder }, { $inc: { no_of_files: -1,server_file_storage:-1*file.size, } }, function(err, result) {
       if (err) {
         console.error(err);
       } else {
@@ -369,7 +380,7 @@ router.delete('/deletefile/:id',fetchuser,fetchfolder,async (req,res)=>{
    )
   User.updateOne(
     {$id: req.user.id},
-    { $inc: { no_of_files: -1,total_server_file_storage:file.size, } }, function(err, result) {
+    { $inc: { no_of_files: -1,total_server_file_storage:-1*file.size, } }, function(err, result) {
       if (err) {
         console.error(err);
       } else {
@@ -466,8 +477,8 @@ function createZipFile(inputFile, outputFile, password) {
       host: 'smtp.ethereal.email',
       port: 587,
       auth: {
-          user: 'gerry.ortiz41@ethereal.email',
-          pass: '2kkFWmXzRTxCA2amNN'
+          user: 'enola19@ethereal.email',
+          pass: 'Vx5rSFAXAW5gGf9rEr'
       }
   });
 

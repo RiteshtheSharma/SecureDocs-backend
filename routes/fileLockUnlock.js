@@ -34,7 +34,7 @@ const upload = multer({
 router.post('/decrypt', upload.single('file'),async(req,res)=>{
 
  const inputFile = req.file.path;
-    const outputFile = `${req.file.filename.slice(0,-4)}`;
+    const outputFile = `temp${req.file.filename.slice(req.file.filename.indexOf('.'))}`;
     const password = req.body.password;
  
     try{ console.log(outputFile,path.dirname(__dirname)," fkfkoko"  )

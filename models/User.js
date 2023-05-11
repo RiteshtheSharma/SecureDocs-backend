@@ -15,15 +15,33 @@ const UserSchema = new Schema({
     no_of_folders:{
         type:Number,
         default:0
+        ,validate: {
+            validator: function(value) {
+              return value >= 0;
+            },
+            message: props => `${props.value} is not a positive number!`
+          }
     },
     no_of_files:{
         type:Number,
-        default:0
+        default:0,
+        validate: {
+            validator: function(value) {
+              return value >= 0;
+            },
+            message: props => `${props.value} is not a positive number!`
+          }
     },
     // size in bytes
     total_server_file_storage:{
        type:Number,
-       default:0
+       default:0,
+       validate: {
+        validator: function(value) {
+          return value >= 0;
+        },
+        message: props => `${props.value} is not a positive number!`
+      }
     },
     date:{
         type:Date,
